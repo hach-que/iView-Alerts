@@ -1,0 +1,147 @@
+<!DOCTYPE>
+<html>
+<head>
+<script type="text/javascript">
+    function doMute()
+    {
+        window.shouldClose = true;
+        window.shouldMute = true;
+        chrome.extension.getBackgroundPage().Runtime.checkNotifications();
+    }
+    
+    function doClose()
+    {
+        window.shouldClose = true;
+        window.shouldMute = false;
+        chrome.extension.getBackgroundPage().Runtime.checkNotifications();
+    }
+</script>
+<style type="text/css">
+    html, body
+    {
+        font-family: Arial;
+        font-size: 12px;
+        line-height: 16px;
+        margin: 0px;
+        padding: 0px;
+        margin-right: 10px;
+    }
+    
+    div#left
+    {
+        float: left;
+        width: 48px;
+        margin: 10px;
+    }
+    
+    div#left img#thumbnail
+    {
+        width: 48px;
+        margin-bottom: 5px;
+    }
+    
+    div#right
+    {
+        margin-left: 68px;
+    }
+    
+    div#series, div#title
+    {
+        font-weight: bold;
+        padding-top: 6px;
+    }
+    
+    div#title
+    {
+        display: none;
+    }
+    
+    div#series:before
+    {
+        content: "Series: ";
+        font-weight: normal;
+        color: #999;
+    }
+    
+    div#title:before
+    {
+        content: "Show: ";
+        font-weight: normal;
+        color: #999;
+    }
+    
+    div#episode
+    {
+        font-weight: bold;
+        margin-top: 2px;
+    }
+    
+    div#episode:before
+    {
+        content: "Episode: ";
+        font-weight: normal;
+        color: #999;
+    }
+    
+    div#description
+    {
+        font-size: 10px;
+        margin-top: 3px;
+        margin-bottom: 6px;
+    }
+    
+    a
+    {
+        display: block;
+        font-size: 11px;
+        font-weight: bold;
+        line-height: 20px;
+        height: 20px;
+        color: #363;
+        text-decoration: none;
+    }
+    
+    a#mute
+    {
+        position: absolute;
+        bottom: 5px;
+        left: 10px;
+        color: #633;
+    }
+</style>
+</head>
+<body>
+<div id="left">
+    <img id="thumbnail" src="about:blank" />
+    <a href="#" target="iview" onclick="doClose(); return true;" id="watch" title="Opens ABC iView to watch this program now.">Watch</a>
+    <a href="#" onclick="doMute(); return false;" id="mute" title="Prevents notifications about this series being shown again.">Mute</a>
+</div>
+<div id="right">
+    <div id="series"></div>
+    <div id="episode"></div>
+    <div id="title"></div>
+    <div id="description"></div>
+</div>
+<script type="text/javascript">
+window.shouldClose = false;
+window.shouldMute = false;
+var data = chrome.extension.getBackgroundPage().Runtime.getNotification();
+document.getElementById("thumbnail").src = data.thumbnail;
+document.getElementById("watch").href = data.player;
+if (data.series == null)
+{
+    document.getElementById("series").style.display = "none";
+    document.getElementById("episode").style.display = "none";
+    document.getElementById("mute").style.display = "none";
+    document.getElementById("title").style.display = "block";
+    document.getElementById("title").innerHTML = data.title;
+}
+else
+{
+    document.getElementById("series").innerHTML = data.series;
+    document.getElementById("episode").innerHTML = "#" + data.number + " " + data.title;
+}
+document.getElementById("description").innerHTML = data.description;
+</script>
+</body>
+</html>

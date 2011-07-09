@@ -123,25 +123,32 @@
     <div id="description"></div>
 </div>
 <script type="text/javascript">
-window.shouldClose = false;
-window.shouldMute = false;
-var data = chrome.extension.getBackgroundPage().Runtime.getNotification();
-document.getElementById("thumbnail").src = data.thumbnail;
-document.getElementById("watch").href = data.player;
-if (data.series == null)
+try
 {
-    document.getElementById("series").style.display = "none";
-    document.getElementById("episode").style.display = "none";
-    document.getElementById("mute").style.display = "none";
-    document.getElementById("title").style.display = "block";
-    document.getElementById("title").innerHTML = data.title;
+    window.shouldClose = false;
+    window.shouldMute = false;
+    var data = chrome.extension.getBackgroundPage().Runtime.getNotification();
+    document.getElementById("thumbnail").src = data.thumbnail;
+    document.getElementById("watch").href = data.player;
+    if (data.series == null)
+    {
+        document.getElementById("series").style.display = "none";
+        document.getElementById("episode").style.display = "none";
+        document.getElementById("mute").style.display = "none";
+        document.getElementById("title").style.display = "block";
+        document.getElementById("title").innerHTML = data.title;
+    }
+    else
+    {
+        document.getElementById("series").innerHTML = data.series;
+        document.getElementById("episode").innerHTML = "#" + data.number + " " + data.title;
+    }
+    document.getElementById("description").innerHTML = data.description;
 }
-else
+catch (e)
 {
-    document.getElementById("series").innerHTML = data.series;
-    document.getElementById("episode").innerHTML = "#" + data.number + " " + data.title;
+    doClose();
 }
-document.getElementById("description").innerHTML = data.description;
 </script>
 </body>
 </html>

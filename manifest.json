@@ -1,6 +1,6 @@
 {
   "name": "iView Alerts",
-  "version": "0.1.10708.0",
+  "version": "0.1.10709.0",
   "description": "An extension to notify you when new episodes are available on ABC iView.",
   "icons": { "128": "logo.png", "48": "logo48.png" },
   "background_page": "bg.html",

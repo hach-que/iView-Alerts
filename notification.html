@@ -6,6 +6,15 @@
     {
         window.shouldClose = true;
         window.shouldMute = true;
+        window.shouldLater = false;
+        chrome.extension.getBackgroundPage().Runtime.checkNotifications();
+    }
+    
+    function doLater()
+    {
+        window.shouldClose = true;
+        window.shouldMute = false;
+        window.shouldLater = true;
         chrome.extension.getBackgroundPage().Runtime.checkNotifications();
     }
     
@@ -13,6 +22,7 @@
     {
         window.shouldClose = true;
         window.shouldMute = false;
+        window.shouldLater = false;
         chrome.extension.getBackgroundPage().Runtime.checkNotifications();
     }
 </script>
@@ -88,6 +98,7 @@
         font-size: 10px;
         margin-top: 3px;
         margin-bottom: 6px;
+        min-height: 60px;
     }
     
     a
@@ -99,6 +110,12 @@
         height: 20px;
         color: #363;
         text-decoration: none;
+        cursor: pointer;
+    }
+    
+    a#later
+    {
+        color: #663;
     }
     
     a#mute
@@ -114,6 +131,7 @@
 <div id="left">
     <img id="thumbnail" src="about:blank" />
     <a href="#" target="iview" onclick="doClose(); return true;" id="watch" title="Opens ABC iView to watch this program now.">Watch</a>
+    <a href="#" onclick="doLater(); return false;" id="later" title="Store this program in a list of programs to watch later.">Later</a>
     <a href="#" onclick="doMute(); return false;" id="mute" title="Prevents notifications about this series being shown again.">Mute</a>
 </div>
 <div id="right">

@@ -150,8 +150,108 @@ Runtime = Class.create({
                 // Grab the name of the series from the document.
                 me.muteShow(win.document.getElementById("series").innerText.trim());
             }
+            else if (win.shouldLater)
+            {
+                // Grab the data about the show.
+                me.laterShow(win.data);
+            }
             if (win.shouldClose)
                 win.close();
+        });
+    },
+    
+    // <summary>
+    // Returns a list of saved programs.
+    // </summary>
+    getSavedPrograms: function()
+    {
+        var lS = window.Storage.getRawItem("later-shows");
+        if (lS == null) lS = [];
+        return lS;
+    },
+    
+    // <summary>
+    // Removes a saved program from the list.
+    // </summary>
+    removeSavedProgram: function(show)
+    {
+        var lS = window.Storage.getRawItem("later-shows");
+        if (lS == null) lS = [];
+        for (i = 0; i < lS.length; i += 1)
+        {
+            if (lS[i].thumbnail == show.thumbnail &&
+                lS[i].player == show.player &&
+                lS[i].series == show.series &&
+                lS[i].number == show.number &&
+                lS[i].title == show.title &&
+                lS[i].description == show.description)
+            {
+                lS.splice(i, 1);
+                i -= 1;
+            }
+        }
+        window.Storage.setRawItem("later-shows", lS);
+    },
+    
+    // <summary>
+    // Adds a saved program to the list.
+    // </summary>
+    addSavedProgram: function(show)
+    {
+        this.laterShow(show);
+    },
+    
+    // <summary>
+    // Returns information about whether or not the current page is a program.  This
+    // function returns immediately as it uses asynchronous APIs.
+    // </summary>
+    getProgram: function(callback)
+    {
+        // Since the tab / window functions are asynchronous, we have to do this all
+        // via callbacks.
+        chrome.windows.getLastFocused(function(w)
+        {
+            chrome.tabs.getSelected(w.id, function(t)
+            {
+                // Parse the URL and return whether it is a program or not.
+                var start1 = "http://www.abc.net.au/iview/#/view/";
+                var start2 = "http://www.abc.net.au/iview/#/program/";
+                if (t.url.substring(0, start1.length) == start1 || t.url.substring(0, start2.length) == start2)
+                {
+                    // We are a program, also create a save() function.
+                    callback({
+                        isProgram: true,
+                        saveProgram: function()
+                        {
+                            // We can't yet dynamically get the name of a show based
+                            // on the page, so we need to ask the user what they want
+                            // to call this show.
+                            var name = prompt("iView Alerts can't automatically retrieve the show name for you when adding from a page.  What is the name of this show / episode?", "Unknown Episode");
+                            
+                            // If the user actually entered something...
+                            if (name != null)
+                            {
+                                chrome.extension.getBackgroundPage().Runtime.addSavedProgram({
+                                    thumbnail: null,
+                                    player: t.url,
+                                    series: null,
+                                    number: null,
+                                    title: name,
+                                    description: null,
+                                });
+                            }
+                        }
+                    });
+                }
+                else
+                {
+                    // We are not a program.
+                    callback({
+                        isProgram: false,
+                        saveProgram: null
+                    });
+                }
+            });
         });
     },
     
@@ -164,6 +264,17 @@ Runtime = Class.create({
         if (mutedShows == null) mutedShows = [];
         mutedShows.push(show);
         window.Storage.setRawItem("muted-shows", mutedShows);
+    },
+    
+    // <summary>
+    // Stores the show for later.
+    // </summary>
+    laterShow: function(show)
+    {
+        var laterShows = window.Storage.getRawItem("later-shows");
+        if (laterShows == null) laterShows = [];
+        laterShows.push(show);
+        window.Storage.setRawItem("later-shows", laterShows);
     },
     
     // <summary>

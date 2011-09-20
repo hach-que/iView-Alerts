@@ -1,0 +1,314 @@
+<!DOCTYPE>
+<html>
+<head>
+<script type="text/javascript">
+
+</script>
+<style type="text/css">
+    html, body
+    {
+        font-family: Arial;
+        font-size: 12px;
+        line-height: 16px;
+        padding: 10px;
+        margin: 0px;
+        width: 450px;
+    }
+    
+    table#programs
+    {
+        width: 430px;
+        margins: auto;
+    }
+    
+    table#programs tr
+    {
+        cursor: pointer;
+    }
+    
+    table#programs tr td { border-top: solid 1px #FFF; border-bottom: solid 1px #FFF; }
+    table#programs tr td:first-child { border-left: solid 1px #FFF; }
+    table#programs tr td:last-child { border-right: solid 1px #FFF; }
+    table#programs tr:hover td { border-top: solid 1px #CCC; border-bottom: solid 1px #666; }
+    table#programs tr:hover td:first-child { border-left: solid 1px #CCC; border-top-left-radius: 5px; border-bottom-left-radius: 5px; }
+    table#programs tr:hover td:last-child { border-right: solid 1px #666; border-top-right-radius: 5px; border-bottom-right-radius: 5px; }
+    
+    table#programs td
+    {
+        font-size: 12px;
+        padding: 5px;
+    }
+    
+    table#programs tr td:last-child
+    {
+        text-align: right;
+        padding-right: 15px;
+    }
+    
+    table#programs tr.noborder td:last-child { text-align: left; padding-right: 0px; }   
+    
+    table#programs td#none
+    {
+        text-align: center;
+        cursor: default;
+    }
+    
+    table#programs tr.noborder { cursor: default; }
+    table#programs tr td.noborder { border: none; }
+    table#programs tr:hover td.noborder { border: none; }
+    
+    table#programs td.thumbnail, img.thumbnail
+    {
+        width: 48px;
+    }
+    
+    table#programs td.thumbnail
+    {
+        padding-left: 7px;
+    }
+    
+    table#programs td.thumbnail#none
+    {
+        line-height: 26px;
+    }
+    
+    table#programs td.info
+    {
+        padding-left: 5px;
+    }
+    
+    table#programs td.watch
+    {
+        width: 70px;
+    }
+    
+    div.series, div.title
+    {
+        font-weight: bold;
+    }
+    
+    div.series:before
+    {
+        content: "Series: ";
+        font-weight: normal;
+        color: #999;
+    }
+    
+    div.title:before
+    {
+        content: "Show: ";
+        font-weight: normal;
+        color: #999;
+    }
+    
+    div.episode
+    {
+        font-weight: bold;
+        margin-top: 2px;
+    }
+    
+    div.episode:before
+    {
+        content: "Episode: ";
+        font-weight: normal;
+        color: #999;
+    }
+    
+    span
+    {
+        display: block;
+        font-size: 11px;
+        font-weight: bold;
+        line-height: 20px;
+        height: 20px;
+        color: #363;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    
+    span.later
+    {
+        color: #633;
+        text-align: center;
+    }
+    
+    table#programs tr td.later
+    {
+        background-color: #FEFEFE;
+        border-top: solid 1px #EFEFEF;
+        border-left: solid 1px #EFEFEF;
+        border-right: solid 1px #DDD;
+        border-bottom: solid 1px #DDD;
+        border-radius: 5px;
+    }
+    
+    table#programs tr:hover td.later
+    {
+        background-color: #FAFAFA;
+        border-top: solid 1px #CCC;
+        border-bottom: solid 1px #666;
+        border-left: solid 1px #CCC;
+        border-right: solid 1px #666;
+    }
+</style>
+</head>
+<body>
+<table id="programs" cellspacing="0" cellpadding="0">
+</table>
+<script type="text/javascript">
+try
+{
+    var table = document.getElementById("programs");
+    
+    // Check to see whether the current page the user is on is an
+    // ABC iView page, if it is, offer to save the program.
+    chrome.extension.getBackgroundPage().Runtime.getProgram(function(data)
+    {
+        if (data.isProgram)
+        {
+            // Add row to table.
+            var row = table.insertRow(0);
+            
+            // Add cell with "You have no saved programs" message.
+            var cell = row.insertCell(0);
+            var span = document.createElement('span');
+            span.className = "later";
+            span.innerText = "Save this program for later viewing!";
+            cell.className = "later";
+            cell.colSpan = "3";
+            cell.appendChild(span);
+            
+            // Add the function to handle saving this program.
+            row.onclick = function()
+            {
+                data.saveProgram();
+                window.close();
+            };
+            
+            // Add another empty row as spacing.
+            var row = table.insertRow(1);
+            
+            // Add cell for spacing.
+            var cell = row.insertCell(0);
+            cell.colSpan = "3";
+            cell.className = "noborder";
+            cell.appendChild(document.createTextNode(''));
+        }
+    });
+    
+    // Now display information about our saved programs.
+    var data = chrome.extension.getBackgroundPage().Runtime.getSavedPrograms();
+    if (data.length == 0)
+    {
+        // Add row to table.
+        var row = table.insertRow(table.rows.length);
+        
+        // Add cell with "You have no saved programs" message.
+        var cell = row.insertCell(0);
+        var text = document.createTextNode("You have not saved any programs for watching later... yet!");
+        cell.id = "none";
+        cell.className = "noborder";
+        cell.appendChild(text);
+    }
+    else
+    {
+        // Add row to table.
+        var row = table.insertRow(table.rows.length);
+        row.className = "noborder";
+        
+        // Add cell with "You have no saved programs" message.
+        var cell = row.insertCell(0);
+        var text = document.createTextNode("You have saved the following programs for future viewing:");
+        cell.colSpan = "3";
+        cell.className = "noborder";
+        cell.appendChild(text);
+        
+        // Loop through and add all the rows.
+        for (i = 0; i < data.length; i += 1)
+        {
+            // Add row to table.
+            var row = table.insertRow(table.rows.length);
+            
+            // Add the first cell that just contains the thumbnail.
+            var cell = row.insertCell(0);
+            if (data[i].thumbnail != null)
+            {
+                var image = document.createElement('img');
+                image.className = "thumbnail";
+                image.src = data[i].thumbnail;
+                cell.className = "thumbnail";
+                cell.appendChild(image);
+            }
+            else
+            {
+                cell.id = "none";
+                cell.className = "thumbnail";
+                cell.innerHTML = "&nbsp;";
+            }
+            
+            // Check to see whether it is a series or standard show.
+            if (data[i].series == null)
+            {
+                // Add the second cell that contains the title.
+                var cell = row.insertCell(1);
+                var show = document.createElement('div');
+                var text = document.createTextNode(data[i].title);
+                show.className = "title";
+                show.innerHTML = data[i].title;
+                cell.className = "info";
+                cell.appendChild(show);
+            }
+            else
+            {
+                // Add the second cell with the series name and episode number.
+                var cell = row.insertCell(1);
+                var series = document.createElement('div');
+                var episode = document.createElement('div');
+                var text1 = document.createTextNode();
+                var text2 = document.createTextNode();
+                series.className = "series";
+                series.innerHTML = data[i].series;
+                episode.className = "episode";
+                episode.innerHTML = "#" + data[i].number + " " + data[i].title;
+                cell.className = "info";
+                cell.appendChild(series);
+                cell.appendChild(episode);
+            }
+            
+            // Add the final cell that contains span that displays "Watch Now"
+            var cell = row.insertCell(2);
+            var span = document.createElement('span');
+            span.className = "watch";
+            span.innerText = "Watch Now";
+            cell.className = "watch";
+            cell.appendChild(span);
+            
+            // Create a copy of the target string.
+            row._link = data[i].player;
+            row._data = {
+                thumbnail: data[i].thumbnail,
+                player: data[i].player,
+                series: data[i].series,
+                number: data[i].number,
+                title: data[i].title,
+                description: data[i].description,
+            };
+            
+            // After all of that.. add an event to the row so it has the same effect
+            // as clicking the link.
+            row.onclick = function()
+            {
+                chrome.extension.getBackgroundPage().Runtime.removeSavedProgram(this._data);
+                chrome.tabs.create({url: this._link});
+            };
+        }
+    }
+}
+catch (e)
+{
+    alert(e);
+    window.close();
+}
+</script>
+</body>
+</html>
